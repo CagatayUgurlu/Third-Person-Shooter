@@ -14,6 +14,8 @@ public class ThirdPersonShooterController : MonoBehaviour
     [SerializeField] private Transform debugTransform;
     [SerializeField] private Transform pfBulletProjectile;
     [SerializeField] private Transform spawnBulletPosition;
+    [SerializeField] private Transform vfxHitGreen;
+    [SerializeField] private Transform vfxHitRed;
 
     private ThirdPersonController thirdPersonController;
     private StarterAssetsInputs starterAssetsInputs;
@@ -26,12 +28,16 @@ public class ThirdPersonShooterController : MonoBehaviour
     private void Update()
     {
         Vector3 mouseWorldPosition = Vector3.zero;
+
         Vector2 screenCenterPoint = new Vector2(Screen.width / 2f, Screen.height / 2f);
         Ray ray = Camera.main.ScreenPointToRay(screenCenterPoint);
+        Transform hitTransform = null;
+
         if (Physics.Raycast(ray, out RaycastHit raycastHit, 999f, aimColliderLayerMask))
         {
             debugTransform.position = raycastHit.point;
             mouseWorldPosition = raycastHit.point;
+            hitTransform = raycastHit.transform;
         }
 
         if (starterAssetsInputs.aim)
@@ -55,8 +61,22 @@ public class ThirdPersonShooterController : MonoBehaviour
 
         if(starterAssetsInputs.shoot)
         {
-            Vector3 aimDir = (mouseWorldPosition - spawnBulletPosition.position).normalized;
-            Instantiate(pfBulletProjectile, spawnBulletPosition.position, Quaternion.LookRotation(aimDir, Vector3.up));
+            if(hitTransform != null)
+            {
+                // Hit smthng
+                if (hitTransform.GetComponent<BulletTarget>() != null)
+                {
+                    // Hit Target
+                    Instantiate(vfxHitGreen, debugTransform.position, Quaternion.identity);
+                }
+                else
+                {
+                    Instantiate(vfxHitRed, debugTransform.position, Quaternion.identity);
+                    // Hit smthng else
+                }
+            }
+            //Vector3 aimDir = (mouseWorldPosition - spawnBulletPosition.position).normalized;
+            //Instantiate(pfBulletProjectile, spawnBulletPosition.position, Quaternion.LookRotation(aimDir, Vector3.up));
             starterAssetsInputs.shoot = false;
         }
 
